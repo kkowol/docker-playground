@@ -1,0 +1,5 @@
+/.devcontainer
+/Dockerfile
+/best.pth
+/munster_000002_000019_leftImg8bit.png
+/semseg
