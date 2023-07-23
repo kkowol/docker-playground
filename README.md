@@ -1,10 +1,12 @@
 # docker-playground
-build the container:
+1. create a new folder and copy the Dockerfile into it
+
+2. build the container inside the folder:
 ```
 docker build -t semseg:latest .
 ```
 
-start the container in the current directory:
+3. start the container in the current directory:
 ```
 docker run -v "$(pwd)/prediction:/home/semseg/prediction" semseg
 ```
