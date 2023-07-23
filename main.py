@@ -45,7 +45,7 @@ def color_image(arr):
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
-    net = load_network(19, './best.pth', device)
+    net = load_network(19, './cityscapes_best.pth', device)
     print("Network loaded")
 
     if not os.path.exists("prediction"):
