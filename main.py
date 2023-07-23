@@ -28,7 +28,7 @@ def from_path_to_input(path):
     img = img.unsqueeze(0)
     return img
 
-def load_network(num_classes=19, ckpt_path='./best.pth'):
+def load_network(num_classes=19, ckpt_path='./cityscapes_best.pth'):
     net = nn.DataParallel(
         DeepWV3Plus(num_classes))
     net.load_state_dict(torch.load(ckpt_path, map_location=torch.device('cpu'))['state_dict'], strict=False)
@@ -42,10 +42,11 @@ def color_image(arr):
     return predc
 
 
-net = load_network(19, './best.pth')
+net = load_network(19, './cityscapes_best.pth')
 print("Network loaded")
 
-os.mkdir("prediction")
+if not os.path.exists("prediction"):
+    os.mkdir("prediction")
 
 for im in os.listdir('./images'):
     img = os.path.join('./images', im)
