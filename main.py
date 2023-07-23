@@ -13,8 +13,8 @@ from src.model.deepv3 import DeepWV3Plus
 import src.datasets.cityscapes as cs
 
 
-def prediction(net, image):
-    image = image.cpu()
+def prediction(net, image, dvc):
+    image = image.to(dvc)
     with torch.no_grad():
         out = net(image)
     out = out.data.cpu()
@@ -28,11 +28,11 @@ def from_path_to_input(path):
     img = img.unsqueeze(0)
     return img
 
-def load_network(num_classes=19, ckpt_path='./cityscapes_best.pth'):
+def load_network(num_classes=19, ckpt_path='./cityscapes_best.pth', dvc = torch.device("cuda")):
     net = nn.DataParallel(
         DeepWV3Plus(num_classes))
-    net.load_state_dict(torch.load(ckpt_path, map_location=torch.device('cpu'))['state_dict'], strict=False)
-    net = net.cpu()
+    net.load_state_dict(torch.load(ckpt_path, map_location= dvc)['state_dict'], strict=False)
+    net = net.to(dvc)
     net.eval()
     return net
 
@@ -42,20 +42,26 @@ def color_image(arr):
     return predc
 
 
-net = load_network(19, './cityscapes_best.pth')
-print("Network loaded")
+def main():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+    net = load_network(19, './best.pth', device)
+    print("Network loaded")
 
-if not os.path.exists("prediction"):
-    os.mkdir("prediction")
+    if not os.path.exists("prediction"):
+        os.mkdir("prediction")
 
-for im in os.listdir('./images'):
-    img = os.path.join('./images', im)
-    inp = from_path_to_input(img)
-    print("Image loaded")
-    softmax = prediction(net, inp)
-    softmax = np.squeeze(softmax)
-    print("Softmax predicted")
-    pred = np.argmax(softmax, axis=0)
-    pred = np.squeeze(pred)
-    pred_c = color_image(pred)
-    Image.fromarray(pred_c.astype('uint8')).save(os.path.join('./prediction', im))
+    for im in os.listdir('./images'):
+        img = os.path.join('./images', im)
+        inp = from_path_to_input(img)
+        print("Image loaded")
+        softmax = prediction(net, inp, device)
+        softmax = np.squeeze(softmax)
+        print("Softmax predicted")
+        pred = np.argmax(softmax, axis=0)
+        pred = np.squeeze(pred)
+        pred_c = color_image(pred)
+        Image.fromarray(pred_c.astype('uint8')).save(os.path.join('./prediction', im))
+        
+if __name__ == "__main__":
+    main()
